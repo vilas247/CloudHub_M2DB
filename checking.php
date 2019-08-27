@@ -23,52 +23,110 @@
 	echo $token = curl_exec($ch);
 	$adminToken=  json_decode($token);
 	$headers = array('Content-Type:application/json','Authorization:Bearer '.$adminToken);
-
-	// Createt Product REST API URL
-	$apiUrl = $url."/V1/products";
+	
+	/*$apiUrl = $url."/V1/products";
+	$size_array = [];
+	$data = [
+		"product" => [
+			"sku" => "TESTVARNEWCHILD12",
+			"name" => "Test variation pp12 child",
+			"attribute_set_id" => 4,        
+			"status" => 1,
+			"visibility" => 4,
+			"price" => '20',
+			"type_id" => "simple",
+			"weight" => "1",
+			"extension_attributes" => [
+				"category_links" => [
+					[
+						"position" => 0,
+						"category_id" => "5"
+					],
+					[
+						"position" => 1,
+						"category_id" => "7"
+					]
+				],
+				"stock_item" => [
+					"qty" => "500",
+					"is_in_stock" => true
+				]
+			],
+			"custom_attributes" => [
+				[
+					"attribute_code" => "description",
+					"value" => "Description of produclmsgkldfdfkglt here2"
+				],
+				[
+					"attribute_code" => "short_description",
+					"value" => "short descriptklmxgbldfmlion of product2"
+				],
+				[
+					"attribute_code" => "size",
+					"value" => 30
+				]
+			]
+		]
+	];
+	$data_string = json_encode($data);
 
 	$ch = curl_init();
+	curl_setopt($ch,CURLOPT_URL, $apiUrl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	echo "<br />10>> ".$response = curl_exec($ch);
+
+	$child_response = json_decode($response, TRUE);
+	curl_close($ch);
+
+	print '<pre>';
+	print_r($child_response);
+	
+	$apiUrl = $url."/V1/products";
 	$data = [
-	    "product" => [
-	        "sku" => "MYSKUCHECK",
-	        "name" => "My Sku Check",
-	        "attribute_set_id" => 4,
-	        "price" => 0,
-	        "status" => 1,
-	        "visibility" => 4,
-	        "type_id" => 'configurable',
-	        "weight" => "1",
-	        "extension_attributes" => [
-	            "category_links" => [
-	                [
-	                    "position" => 0,
-	                    "category_id" => "5"
-	                ],
-	                [
-	                    "position" => 1,
-	                    "category_id" => "7"
-	                ]
-	            ],
-	            "stock_item" => [
-	                "qty" => "500",
-	                "is_in_stock" => true
-	            ]
-	        ],
-	        "custom_attributes" => [
-	            [
-	                "attribute_code" => "description",
-	                "value" => "mudescription"
-	            ],
-	            [
-	                "attribute_code" => "short_description",
-	                "value" => "mudescription"
-	            ],
-				[
-					"attribute_code" => "size1",
-					"value" => 52
+		"product" => [
+			"sku" => "TESTVARNEWCHILD13",
+			"name" => "Test variation pp13 pchild1",
+			"attribute_set_id" => 4,        
+			"status" => 1,
+			"visibility" => 4,
+			"price" => '20',
+			"type_id" => "simple",
+			"weight" => "1",
+			"extension_attributes" => [
+				"category_links" => [
+					[
+						"position" => 0,
+						"category_id" => "5"
+					],
+					[
+						"position" => 1,
+						"category_id" => "7"
+					]
+				],
+				"stock_item" => [
+					"qty" => "500",
+					"is_in_stock" => true
 				]
-	        ]
-	    ]
+			],
+			"custom_attributes" => [
+				[
+					"attribute_code" => "description",
+					"value" => "Description of product hklmlere2"
+				],
+				[
+					"attribute_code" => "short_description",
+					"value" => "short description of proknjknjkjkduct2"
+				],
+				[
+					"attribute_code" => "size",
+					"value" => 31
+				]
+			]
+		]
 	];
 	$data_string = json_encode($data);
 
@@ -81,143 +139,198 @@
 	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 	echo "<br />11>> ".$response = curl_exec($ch);
 
+	$child_response1 = json_decode($response, TRUE);
+	curl_close($ch);
+
+	print '<pre>';
+	print_r($child_response1);
+	
+	
+	$size_array[]['value_index'] = 9;
+	$size_array[]['value_index'] = 10;
+	$item_sku = 'test_var_222';
+	$ch = curl_init();
+	$data = [
+		"product" => [
+			"sku" => $item_sku,
+			"name" => "Test variation222 pp",
+			"attribute_set_id" => 4,        
+			"status" => 1,
+			"visibility" => 4,
+			"type_id" => "configurable",
+			"weight" => "1",
+			"extension_attributes" => [
+				"category_links" => [
+					[
+						"position" => 0,
+						"category_id" => "5"
+					],
+					[
+						"position" => 1,
+						"category_id" => "7"
+					]
+				],
+				"stock_item" => [
+					"is_in_stock" => true
+				],
+				"configurable_product_options" => [
+					[
+						"attribute__id"=>"138",
+						"label"=>"Size",
+						"position"=>0,
+						"values"=>$size_array
+					]
+				],
+				"configurable_product_links"=>[
+				   $child_response['id'],$child_response1['id']
+				]
+			],
+			"custom_attributes" => [
+				[
+					"attribute_code" => "description",
+					"value" => "Description of lmg;mkglproduct here2"
+				],
+				[
+					"attribute_code" => "short_description",
+					"value" => "short description l,ghfgmklof product2"
+				]
+			]
+		]
+	];
+	print_r($data);
+	$data_string = json_encode($data);
+	print_r($data_string);
+	$ch = curl_init();
+	curl_setopt($ch,CURLOPT_URL, $apiUrl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	echo "<br />12>> ".$response = curl_exec($ch);
+
 	$response = json_decode($response, TRUE);
 	curl_close($ch);
-	echo"===10";print_r($response);echo "<br/>";
+
+	print '<pre>';
+	print_r($response);exit;*/
 	
+	/*$apiUrl = $url."/default/V1/products/attribute-sets";
+	$data = array (
+		  'attributeSet' => 
+		  array (
+			'attribute_set_name' => 'Games',
+			'sort_order' => 10,
+			'entity_type_id' => 4,
+		  ),
+		  'skeletonId' => 4,
+		);
+	$data_string = json_encode($data);
+
 	$ch = curl_init();
-				$data = [
-					"product" => [
-						"sku" => "MYSKUCHECK1",
-						"name" => "My Sku Check1",
-						"attribute_set_id" => "4",
-						"price" => 20,
-						"status" => 1,
-						"visibility" => 2,
-						"type_id" => "virtual",
-						"weight" => "1",
-						"extension_attributes" => [
-							"category_links" => [
-								[
-									"position" => 0,
-									"category_id" => "5"
-								],
-								[
-									"position" => 1,
-									"category_id" => "7"
-								]
-							],
-							"stock_item" => [
-								"qty" => "500",
-								"is_in_stock" => true
-							]
-						],
-						"custom_attributes" => [
-							[
-								"attribute_code" => "description",
-								"value" => "mudescription"
-							],
-							[
-								"attribute_code" => "short_description",
-								"value" => "mudescription"
-							],
-							[
-								"attribute_code" => "size1",
-								"value" => 168
-							]
+	curl_setopt($ch,CURLOPT_URL, $apiUrl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	echo "<br />11>> ".$response = curl_exec($ch);
+
+	$child_response = json_decode($response, TRUE);
+	curl_close($ch);
+
+	print '<pre>';
+	print_r($child_response);exit;*/
+	
+	/*$apiUrl = $url."/V1/products/attribute-sets/attributes";
+	$data = [
+				"attributeSetId" => 4,
+				"attributeGroupId" => 7,
+				"attributeCode" => 138,
+				"sortOrder" => 0
+				];
+	$data_string = json_encode($data);
+	//print_r($data_string);exit;
+
+	$ch = curl_init();
+	curl_setopt($ch,CURLOPT_URL, $apiUrl);
+	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	echo "<br />11>> ".$response = curl_exec($ch);
+
+	$child_response = json_decode($response, TRUE);
+	curl_close($ch);
+
+	print '<pre>';
+	print_r($child_response);exit;*/
+	
+	/*$apiUrl = $url."/V1/products/attributes/10/options";
+	$data = [
+				"option" => [
+					"lable" => 138,
+					"value" => "31",
+					"sort_order" => 0,
+					"is_default" => false,
+					"store_labels" => [
+						[
+							"store_id" => 0,
+							"label" => "size"
 						]
 					]
-				];
-				$data_string = json_encode($data);
+					
+				]
+			];
+	$data_string = json_encode($data);
+	//print_r($data_string);exit;
 
-				$ch = curl_init();
-				curl_setopt($ch,CURLOPT_URL, $apiUrl);
-				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-				echo "<br />11>> ".$response = curl_exec($ch);
+	$ch = curl_init();
+	curl_setopt($ch,CURLOPT_URL, $apiUrl);
+	//curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+	//curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	echo "<br />11>> ".$response = curl_exec($ch);
 
-				$response = json_decode($response, TRUE);
-				curl_close($ch);
-				
-				/* Map child product */
-				
-				$apiUrl1 = $url."/default/V1/configurable-products/MYSKUCHECK/options";
-				
-				$data = [
-					"option" => [
-						"attribute_id" => "141",
-						"label" => "Size1",
-						"position" => 0,
-						"is_use_default" => true,
-						"values" => [
-							[
-								'value_index' => 168
-							]
-						]
-					]
-				];
-				
-				$data_string = json_encode($data);
-				$headers = array('Content-Type:application/json','Authorization:Bearer '.$adminToken);
+	$child_response = json_decode($response, TRUE);
+	curl_close($ch);
 
-				$ch = curl_init();
-				curl_setopt($ch,CURLOPT_URL, $apiUrl1);
-				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-				echo "<br />23>> ".$response = curl_exec($ch);echo "<br/>";
-
-				$response = json_decode($response, TRUE);
-				curl_close($ch);
-				
-				
-				/* Link product to parent */
-				
-				$apiUrl1 = $url."/default/V1/configurable-products/MYSKUCHECK/child";
-
-				$data = [
-					"childSku" => "MYSKUCHECK1"
-				];
-				
-				$data_string = json_encode($data);
-				print_r($data_string);echo "<br/>";
-				$headers = array('Content-Type:application/json','Authorization:Bearer '.$adminToken);
-
-				$ch = curl_init();
-				curl_setopt($ch,CURLOPT_URL, $apiUrl1);
-				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-				echo "<br />24>> ".$response = curl_exec($ch);echo "<br/>";
-
-				$response = json_decode($response, TRUE);
-				curl_close($ch);
-				
-
+	print '<pre>';
+	print_r($child_response);*/
 	
+	$apiUrl = $url."/V1/products/attribute-sets/4/attributes";
+	$data = array (
+		  'attributeSet' => 
+		  array (
+			'attribute_set_id' => 4,
+			'attribute_set_name' => 'Default',
+			'sort_order' => 0,
+			'entity_type_id' => 4,
+			'extension_attributes' => 
+				array (
+				),
+		  ),
+		);
+	$data_string = json_encode($data);
+	//print_r($data_string);exit;
+
+	$ch = curl_init();
+	curl_setopt($ch,CURLOPT_URL, $apiUrl);
+	//curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "PUT");
+	//curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+	echo "<br />11>> ".$response = curl_exec($ch);
+
+	$child_response = json_decode($response, TRUE);
+	curl_close($ch);
+
+	print '<pre>';
+	print_r($child_response);
 	
-	/* Link product to parent */
-				
-				$apiUrl1 = $url."/V1/products/MYSKUCHECK";
-				
-				$headers = array('Content-Type:application/json','Authorization:Bearer '.$adminToken);
-
-				$ch = curl_init();
-				curl_setopt($ch,CURLOPT_URL, $apiUrl1);
-				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-				//curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-				curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-				curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-				echo "<br />24>> ".$response = curl_exec($ch);echo "<br/>";
-
-				$response = json_decode($response, TRUE);
-				curl_close($ch);
+	echo array_search('games', array_column($child_response, 'attribute_code'));
 ?>
