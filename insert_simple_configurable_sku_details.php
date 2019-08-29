@@ -1,14 +1,12 @@
 <?php
 	require 'crypto-aes.php';
+	require 'config.php';
 	define('TIMEOUT',1000000);
-
-	$passphrase = "38aystr0ngpa55w0rd";
-
 
 	$relogin = false;
 	//Step1 : Login API call to get the usertoken and DB code details
-	$loginURL = 'https://node1.247cloudhub.co.uk/UserApis/API/UserSettings/Login';
-	$loginPostData = CryptoJSAES::encrypt('<loginrequest><username>tapan@247commerce.co.uk</username><password>tapan247*</password><ipaddress>127.1.1.1</ipaddress><responsetype>json</responsetype></loginrequest>', $passphrase);
+	$login_request = '<loginrequest><username>tapan@247commerce.co.uk</username><password>tapan247*</password><ipaddress>127.1.1.1</ipaddress><responsetype>json</responsetype></loginrequest>';
+	$loginPostData = CryptoJSAES::encrypt($login_request, $passphrase);
 
 	$ch = curl_init($loginURL);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      // return result in a variable
@@ -26,9 +24,12 @@
 	else {   
 	    //echo $data;
 	    echo $decrypted = CryptoJSAES::decrypt($data, $passphrase);
-
+		
 	    $response = json_decode($decrypted, true);
-
+		//add logs to database
+		//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+		insert_data($x247conn,$x247table_name,$loginURL,'cloudhub',$login_request,json_encode($response));
+		
 	    if (strpos(strtolower($response['statusmessage']), 'active session already exists') !== false) {
 		    //making relogin flag true to execute relogin call
 		    $relogin = true;
@@ -46,8 +47,8 @@
 
 	if($relogin) {
 		//Step2 : Re Login API call to get the usertoken and DB code details
-		$reLoginURL = 'https://node1.247cloudhub.co.uk/UserApis/API/UserSettings/ReLogin';
-		$reLoginPostData = CryptoJSAES::encrypt('<reloginrequest><usertoken>'.$usertoken.'</usertoken><username>tapan@247commerce.co.uk</username><password>tapan247*</password><ipaddress>127.1.1.1</ipaddress><responsetype>json</responsetype></reloginrequest>', $passphrase);
+		$reLoginRequest = '<reloginrequest><usertoken>'.$usertoken.'</usertoken><username>tapan@247commerce.co.uk</username><password>tapan247*</password><ipaddress>127.1.1.1</ipaddress><responsetype>json</responsetype></reloginrequest>';
+		$reLoginPostData = CryptoJSAES::encrypt($reLoginRequest, $passphrase);
 
 		$ch = curl_init($reLoginURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      // return result in a variable
@@ -67,7 +68,10 @@
 		    echo $decrypted = CryptoJSAES::decrypt($data, $passphrase);
 
 		    $response = json_decode($decrypted, true);
-
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$reLoginURL,'cloudhub',$reLoginRequest,json_encode($response));
+			
 		    /*print '<pre />';
 		    print_r($response);*/
 
@@ -89,13 +93,13 @@
 		//3. Variation Child SKU: 0787551465266new-VARI
 		//4. Normal SKU: 889698247061new
 		
-		//$sku = '889698247061new';
-		$sku = 'QUIZTPMATCHVARI-19';
+		$sku = '889698247061new';
+		//$sku = 'QUIZTPMATCHVARI-19';
 		//$sku = '0787551465266new-VARI';
 		//$sku = '5060622900084sfp';
 		//Step 3 : Get SKU From DB API call to get SKU details
-		$getSkuFromDBURL = 'https://node1.247cloudhub.co.uk/InventoryAPI/Api/Product/GetSkuFromDB';
-		$getSKUPostData = CryptoJSAES::encrypt('<?xml version="1.0" encoding="utf-8"?><getskufromdbrequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><sku><![CDATA['.$sku.']]></sku><marketplacecode><![CDATA[0]]></marketplacecode><accountcode><![CDATA[0]]></accountcode></getskufromdbrequest>', $passphrase);
+		$skuRequest = '<?xml version="1.0" encoding="utf-8"?><getskufromdbrequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><sku><![CDATA['.$sku.']]></sku><marketplacecode><![CDATA[0]]></marketplacecode><accountcode><![CDATA[0]]></accountcode></getskufromdbrequest>';
+		$getSKUPostData = CryptoJSAES::encrypt($skuRequest, $passphrase);
 
 		$ch = curl_init($getSkuFromDBURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      // return result in a variable
@@ -115,6 +119,10 @@
 		    echo $decrypted = CryptoJSAES::decrypt($data, $passphrase);
 
 		    $response = json_decode($decrypted, true);
+			
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$getSkuFromDBURL,'cloudhub',$skuRequest,json_encode($response));
 
 		    print '<pre />';
 		    print_r($response);
@@ -140,8 +148,8 @@
 
 
 		//step 4: GetQuantityForSku API call to get QTY details
-		$getQuantityForSkuURL = 'https://node1.247cloudhub.co.uk/InventoryAPI/api/Quantity/GetQuantityForSku';
-		$getQuantityForSkuPostData = CryptoJSAES::encrypt('<getquantityforskurequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><sku><![CDATA['.$sku.']]></sku><orderbyclause>0</orderbyclause></getquantityforskurequest>', $passphrase);
+		$QuantityForSkuRequest = '<getquantityforskurequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><sku><![CDATA['.$sku.']]></sku><orderbyclause>0</orderbyclause></getquantityforskurequest>';
+		$getQuantityForSkuPostData = CryptoJSAES::encrypt($QuantityForSkuRequest, $passphrase);
 
 		$ch = curl_init($getQuantityForSkuURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      // return result in a variable
@@ -161,6 +169,10 @@
 		    echo $decrypted = CryptoJSAES::decrypt($data, $passphrase);
 
 		    $response = json_decode($decrypted, true);
+			
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$getQuantityForSkuURL,'cloudhub',$QuantityForSkuRequest,json_encode($response));
 
 		    print '<pre />';
 		    print_r($response);
@@ -171,8 +183,8 @@
 		curl_close($ch); 
 
 		//step 5: GetSkuImagesFromDB API call to get Image details
-		$getSkuImagesFromDBURL = 'https://node1.247cloudhub.co.uk/InventoryAPI/api/Product/GetSkuImagesFromDB';
-		$getSkuImagesFromDBPostData = CryptoJSAES::encrypt('<?xml version="1.0" encoding="utf-8"?><getskuimagesfromdbrequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><sku><![CDATA['.$sku.']]></sku></getskuimagesfromdbrequest>', $passphrase);
+		$skuImagesRequest = '<?xml version="1.0" encoding="utf-8"?><getskuimagesfromdbrequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><sku><![CDATA['.$sku.']]></sku></getskuimagesfromdbrequest>';
+		$getSkuImagesFromDBPostData = CryptoJSAES::encrypt($skuImagesRequest, $passphrase);
 
 		$ch = curl_init($getSkuImagesFromDBURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      // return result in a variable
@@ -192,6 +204,10 @@
 		    echo $decrypted = CryptoJSAES::decrypt($data, $passphrase);
 
 		    $response = json_decode($decrypted, true);
+			
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$getSkuImagesFromDBURL,'cloudhub',$skuImagesRequest,json_encode($response));
 
 		    print '<pre />';
 		    print_r($response);
@@ -210,7 +226,8 @@
 
 		//step 6: GetPriceforSKU API call to get Price details
 		$getPriceforSKUURL = 'https://node1.247cloudhub.co.uk/InventoryAPI/Api/Price/GetPriceforSKU';
-		$getPriceforSKUPostData = CryptoJSAES::encrypt('<?xml version="1.0" encoding="utf-8"?><getpriceforskurequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><marketplacecode>1</marketplacecode><accountcode><![CDATA[1]]></accountcode><sku><![CDATA['.$sku.']]></sku></getpriceforskurequest>', $passphrase);
+		$skuPriceRequest = '<?xml version="1.0" encoding="utf-8"?><getpriceforskurequest><usertoken><![CDATA['.$usertoken.']]></usertoken><dbcode>'.$dbcode.'</dbcode><responsetype><![CDATA[json]]></responsetype><marketplacecode>1</marketplacecode><accountcode><![CDATA[1]]></accountcode><sku><![CDATA['.$sku.']]></sku></getpriceforskurequest>';
+		$getPriceforSKUPostData = CryptoJSAES::encrypt($skuPriceRequest, $passphrase);
 
 		$ch = curl_init($getPriceforSKUURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);      // return result in a variable
@@ -230,6 +247,10 @@
 		    echo $decrypted = CryptoJSAES::decrypt($data, $passphrase);
 
 		    $response = json_decode($decrypted, true);
+			
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$getPriceforSKUURL,'cloudhub',$skuPriceRequest,json_encode($response));
 
 		    print '<pre />';
 		    print_r($response);
@@ -245,11 +266,7 @@
 
 
 	//product creation API in M2
-	$url = "http://127.0.0.1/Magento2.3.2/index.php/rest";
 	$token_url= $url."/V1/integration/admin/token";
-
-	$username= "vilask247commerce";
-	$password= "Vilask*123";
 
 	//Authentication REST API magento 2,    
 	$ch = curl_init();
@@ -266,11 +283,16 @@
 	    'Content-Type: application/json'
 	    ));
 	echo $token = curl_exec($ch);
+	
+	//add logs to database
+	//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+	insert_data($x247conn,$x247table_name,$token_url,'philipstoys',$data_string,json_encode($token));
+	
 	$adminToken=  json_decode($token);
 	$headers = array('Content-Type:application/json','Authorization:Bearer '.$adminToken);
 	
 	/* get All attrbutes from API */
-	$apiUrl = $url."/V1/products/attribute-sets/4/attributes";
+	$apiUrl = $url."/V1/products/attribute-sets/".$x247_config['attribute_set_id']."/attributes";
 	
 	$ch = curl_init();
 	curl_setopt($ch,CURLOPT_URL, $apiUrl);
@@ -283,6 +305,10 @@
 
 	$custom_attributes = json_decode($response, TRUE);
 	curl_close($ch);
+	
+	//add logs to database
+	//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+	insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys','',json_encode($custom_attributes));
 	
 	$insert_cust_attr = array();
 	foreach($child_att as $att_k=>$att_v){
@@ -337,6 +363,10 @@
 
 					print '<pre>';
 					print_r($child_response);
+					
+					//add logs to database
+					//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+					insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys',$data_string,json_encode($child_response));
 				}
 			}
 		}else{
@@ -403,10 +433,14 @@
 			$custom_insert_att = json_decode($response, TRUE);
 			curl_close($ch);
 			
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys',$data_string,json_encode($custom_insert_att));
+			
 			$apiUrl = $url."/V1/products/attribute-sets/attributes/";
 				$data = [
-						  "attributeSetId"=> 4,
-						  "attributeGroupId"=> 7,
+						  "attributeSetId"=> $x247_config['attribute_set_id'],
+						  "attributeGroupId"=> $x247_config['product_group_id'],
 						  "attributeCode"=> $custom_insert_att['attribute_code'],
 						  "sortOrder"=> 0
 						];
@@ -427,11 +461,15 @@
 
 				print '<pre>';
 				print_r($child_response);
+				
+			//add logs to database
+			//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+			insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys',$data_string,json_encode($child_response));
 		}
 	}
 	
 	/* get All attrbutes from API */
-	$apiUrl = $url."/V1/products/attribute-sets/4/attributes";
+	$apiUrl = $url."/V1/products/attribute-sets/".$x247_config['attribute_set_id']."/attributes";
 	
 	$ch = curl_init();
 	curl_setopt($ch,CURLOPT_URL, $apiUrl);
@@ -444,6 +482,10 @@
 
 	$custom_attributes = json_decode($response, TRUE);
 	curl_close($ch);
+	
+	//add logs to database
+	//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+	insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys','',json_encode($custom_attributes));
 	
 	
 	// Iterate for child products
@@ -491,7 +533,7 @@
 					"product" => [
 						"sku" => $vv['SKU'],
 						"name" => $vv['ProductTitle'],
-						"attribute_set_id" => "4",
+						"attribute_set_id" => $x247_config['attribute_set_id'],
 						"price" => $price,
 						"status" => 1,
 						"visibility" => 2,
@@ -502,10 +544,6 @@
 								[
 									"position" => 0,
 									"category_id" => "5"
-								],
-								[
-									"position" => 1,
-									"category_id" => "7"
 								]
 							],
 							"stock_item" => [
@@ -531,7 +569,10 @@
 				$response = json_decode($response, TRUE);
 				curl_close($ch);
 				$child_insert_ids[] = $response['id'];
-				////exit;
+				
+				//add logs to database
+				//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+				insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys',$data_string,json_encode($response));
 
 				//insert child product images
 				$apiUrl1 = $url."/V1/products/".$vv['SKU']."/media";
@@ -569,100 +610,168 @@
 				$response = json_decode($response, TRUE);
 				curl_close($ch);
 				
+				//add logs to database
+				//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+				insert_data($x247conn,$x247table_name,$apiUrl1,'philipstoys',$data_string,json_encode($response));
+				
 				$pos++;
 			}
 		}
 	}
-	
-	$apiUrl = $url."/V1/products";
-	$ch = curl_init();
-	
-	$custom_att = array();
-	$parent_custom_options = [];
-	$fin_parent_custom_options = [];
-	$pos = 0;
-	foreach($child_att as $k=>$v){
-		for($i=1;$i<=5;$i++){
-			if(isset($v['CustomVariationName'.$i]) && !empty($v['CustomVariationName'.$i]) && !empty($v['CustomVariationValue'.$i]) ){
-				$custom_att[$v['CustomVariationName'.$i]] = $v['CustomVariationValue'.$i];
-				$key = array_search(strtolower($v['CustomVariationName'.$i]), array_column($custom_attributes, 'attribute_code'));
-				$option_values = $custom_attributes[$key]['options'];
-				$key1 = array_search($v['CustomVariationValue'.$i],array_column($option_values,'label'));
-				$fin_option_data = $option_values[$key1];
-				if(isset($parent_custom_options[$v['CustomVariationName'.$i]])){
-					$temp_data_values = $parent_custom_options[$v['CustomVariationName'.$i]]['values'];
-					$temp_data_values[] = array('value_index' => $fin_option_data['value']);
-					$parent_custom_options[$v['CustomVariationName'.$i]]['values'] = $temp_data_values;
-				}else{
-					$data = [
-							"attribute__id"=>$custom_attributes[$key]['attribute_id'],
-							"label"=>$v['CustomVariationName'.$i],
-							"position"=>$pos,
-							"values"=>array(array('value_index' => $fin_option_data['value']))
-						];
-					$parent_custom_options[$v['CustomVariationName'.$i]] = $data;	
-					$pos++;
+	if($producttype == "configurable"){
+		// Createt Product REST API URL configurble product
+		$apiUrl = $url."/V1/products";
+		$ch = curl_init();
+		
+		$custom_att = array();
+		$parent_custom_options = [];
+		$fin_parent_custom_options = [];
+		$pos = 0;
+		foreach($child_att as $k=>$v){
+			for($i=1;$i<=5;$i++){
+				if(isset($v['CustomVariationName'.$i]) && !empty($v['CustomVariationName'.$i]) && !empty($v['CustomVariationValue'.$i]) ){
+					$custom_att[$v['CustomVariationName'.$i]] = $v['CustomVariationValue'.$i];
+					$key = array_search(strtolower($v['CustomVariationName'.$i]), array_column($custom_attributes, 'attribute_code'));
+					$option_values = $custom_attributes[$key]['options'];
+					$key1 = array_search($v['CustomVariationValue'.$i],array_column($option_values,'label'));
+					$fin_option_data = $option_values[$key1];
+					if(isset($parent_custom_options[$v['CustomVariationName'.$i]])){
+						$temp_data_values = $parent_custom_options[$v['CustomVariationName'.$i]]['values'];
+						$temp_data_values[] = array('value_index' => $fin_option_data['value']);
+						$parent_custom_options[$v['CustomVariationName'.$i]]['values'] = $temp_data_values;
+					}else{
+						$data = [
+								"attribute__id"=>$custom_attributes[$key]['attribute_id'],
+								"label"=>$v['CustomVariationName'.$i],
+								"position"=>$pos,
+								"values"=>array(array('value_index' => $fin_option_data['value']))
+							];
+						$parent_custom_options[$v['CustomVariationName'.$i]] = $data;	
+						$pos++;
+					}
+							
 				}
-						
 			}
 		}
-	}
-	foreach($parent_custom_options as $k => $v){
-		$fin_parent_custom_options[] = $v;
-	}
-	$data = [
-	    "product" => [
-	        "sku" => $SKU,
-	        "name" => $WebstoreProductTitle,
-	        "attribute_set_id" => 4,
-	        "status" => 1,
-	        "visibility" => 4,
-	        "type_id" => $producttype,
-	        "weight" => "1",
-	        "extension_attributes" => [
-	            "category_links" => [
-	                [
-	                    "position" => 0,
-	                    "category_id" => "5"
-	                ],
-	                [
-	                    "position" => 1,
-	                    "category_id" => "7"
-	                ]
-	            ],
-	            "stock_item" => [
-	                "is_in_stock" => true
-	            ],
-				"configurable_product_options" => $fin_parent_custom_options,
-				"configurable_product_links"=> $child_insert_ids,
-	        ],
-	        "custom_attributes" => [
-	            [
-	                "attribute_code" => "description",
-	                "value" => $WebstoreProductDescription
-	            ],
-	            [
-	                "attribute_code" => "short_description",
-	                "value" => $WebstoreProductDescription
-	            ]
-	        ]
-	    ]
-	];
-	echo "<br/>";echo "product_data++";print_r($data);echo "<br/>";
-	$data_string = json_encode($data);
-	print_r($data_string);echo "<br/>";
-	$ch = curl_init();
-	curl_setopt($ch,CURLOPT_URL, $apiUrl);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	echo "<br />11>> ".$response = curl_exec($ch);
+		foreach($parent_custom_options as $k => $v){
+			$fin_parent_custom_options[] = $v;
+		}
+		$data = [
+			"product" => [
+				"sku" => $SKU,
+				"name" => $WebstoreProductTitle,
+				"attribute_set_id" => $x247_config['attribute_set_id'],
+				"status" => 1,
+				"visibility" => 4,
+				"type_id" => $producttype,
+				"weight" => "1",
+				"extension_attributes" => [
+					"category_links" => [
+						[
+							"position" => 0,
+							"category_id" => "5"
+						]
+					],
+					"stock_item" => [
+						"is_in_stock" => true
+					],
+					"configurable_product_options" => $fin_parent_custom_options,
+					"configurable_product_links"=> $child_insert_ids,
+				],
+				"custom_attributes" => [
+					[
+						"attribute_code" => "description",
+						"value" => $WebstoreProductDescription
+					],
+					[
+						"attribute_code" => "short_description",
+						"value" => $WebstoreProductDescription
+					]
+				]
+			]
+		];
+		echo "<br/>";echo "product_data++";print_r($data);echo "<br/>";
+		$data_string = json_encode($data);
+		print_r($data_string);echo "<br/>";
+		$ch = curl_init();
+		curl_setopt($ch,CURLOPT_URL, $apiUrl);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		echo "<br />11>> ".$response = curl_exec($ch);
+		
+		//add logs to database
+		//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+		insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys',$data_string,json_encode($response));
+		
+		$response = json_decode($response, TRUE);
+		curl_close($ch);
+		echo"===13";print_r($response);
+		
+	}else{
+		// Createt Product REST API URL simple product
+		$apiUrl = $url."/V1/products";
 
-	$response = json_decode($response, TRUE);
-	curl_close($ch);
-	echo"===13";print_r($response);
+		/*$WebstoreStandardPrice = $response['parent']['WebstoreStandardPrice'];
+		$Weight = $response['parent']['Weight'];
+		$MasterQuantity = $response['parent']['MasterQuantity'];
+		$MasterQuantity = $response['parent']['MasterQuantity'];
+		$WebstoreProductDescription = $response['parent']['WebstoreProductDescription'];*/
+
+		$ch = curl_init();
+		$data = [
+			"product" => [
+				"sku" => $SKU,
+				"name" => $WebstoreProductTitle,
+				"attribute_set_id" => $x247_config['attribute_set_id'],
+				"price" => $WebstoreStandardPrice,
+				"status" => 1,
+				"visibility" => 4,
+				"type_id" => $producttype,
+				"extension_attributes" => [
+					"category_links" => [
+						[
+							"position" => 0,
+							"category_id" => "5"
+						]
+					],
+					"stock_item" => [
+						"qty" => $MasterQuantity,
+						"is_in_stock" => true
+					]
+				],
+				"custom_attributes" => [
+					[
+						"attribute_code" => "description",
+						"value" => $WebstoreProductDescription
+					],
+					[
+						"attribute_code" => "short_description",
+						"value" => $WebstoreProductDescription
+					]
+				]
+			]
+		];
+		$data_string = json_encode($data);
+
+		$ch = curl_init();
+		curl_setopt($ch,CURLOPT_URL, $apiUrl);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		echo "<br />11>> ".$response = curl_exec($ch);
+		
+		//add logs to database
+		//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+		insert_data($x247conn,$x247table_name,$apiUrl,'philipstoys',$data_string,json_encode($response));
+		
+		$response = json_decode($response, TRUE);
+		curl_close($ch);
+	}
 	
 	$apiUrl1 = $url."/V1/products/".$SKU."/media";
 
@@ -699,23 +808,9 @@
 	$response = json_decode($response, TRUE);
 	curl_close($ch);
 	
-	
-	/* Link product to parent */
-	
-	$apiUrl1 = $url."/V1/products/".$SKU;
-	$headers = array('Content-Type:application/json','Authorization:Bearer '.$adminToken);
-	
-	$ch = curl_init();
-	curl_setopt($ch,CURLOPT_URL, $apiUrl1);
-	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
-	//curl_setopt($ch, CURLOPT_POSTFIELDS, $data_string);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-	echo "<br />15>> ".$response = curl_exec($ch);
-	$response = json_decode($response, TRUE);
-	curl_close($ch);
-	        
-	echo "custom_att===";print_r($custom_att);exit;
+	//add logs to database
+	//$x247conn = mysqli_connect($x247host,$x247user_name,$x247password,$x247dbname);
+	insert_data($x247conn,$x247table_name,$apiUrl1,'philipstoys',$data_string,json_encode($response));
+	mysqli_close($x247conn);
 
 ?>
